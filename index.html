@@ -31,11 +31,10 @@
             position: absolute;
             right: 0px;
             top: 40vh;
-            transform: rotateY(180deg);
         }
 
         .button>img {
-            height: 25vh;
+            height: 30vh;
             width: 5vw;
         }
 
@@ -45,9 +44,9 @@
             justify-content: space-between;
             position: absolute;
             left: 5px;
-            top: 42vh;
+            top: 45vh;
             z-index: 999;
-            height: 19vh;
+            height: 18vh;
             width: 5vw;
         }
 
@@ -57,9 +56,9 @@
             justify-content: space-between;
             position: absolute;
             right: 5px;
-            top: 42vh;
+            top: 45vh;
             z-index: 999;
-            height: 19vh;
+            height: 18vh;
             width: 5vw;
         }
 
@@ -98,6 +97,14 @@
         .open_door {
             animation: open_door 50ms linear 0ms forwards;
             transform-origin:  top;
+        }
+
+        .honk_me {
+            position: absolute;
+            top: 31vh;
+            left: 41vw;
+            height: 5vh;
+            width: 3vw;
         }
 
         @keyframes close_door {
@@ -150,6 +157,8 @@
         <div id="button_right_door_hitbox" onclick="toggleDoor('right')"></div>
         <div id="button_right_light_hitbox" onclick="toggleLight('right')"></div>
     </div>
+
+    <div class="honk_me" onclick="playAudio('./noises/honk.mp3')"></div>
 </body>
 <script>
     var leftDoorClosed = false;
@@ -164,6 +173,23 @@
     var dead = false;
     var deathCause = '';
 
+        function playAudio(file) {
+            const audio = document.createElement("audio");
+            audio.autoplay = true;
+            audio.src = file;
+            audio.type = 'audio/mp3';
+
+            const id = `${Math.random() * 999}`
+            audio.id = id;
+
+            document.appendChild(audio);
+
+            setTimeout(() => {
+                audio.remove();
+            }, 5000)
+
+        }
+
     function toggleDoor(side) {
         if (side == 'left') {
             leftDoorClosed = !leftDoorClosed;
@@ -176,6 +202,7 @@
             document.getElementById('right_door').classList.toggle('open_door');
             document.getElementById('right_door').classList.toggle('close_door');
         }
+        playAudio('./noises/door_slam.mp3');
     }
 
     function toggleLight(side) {
@@ -228,30 +255,28 @@
 
     function render() {
         setTimeout(() => {
-            let leftButtonImage = "./screens/office/buttons/button_base.png";
-            let rightButtonImage = "./screens/office/buttons/button_base.png";
+            let leftButtonImage = "./screens/office/buttons/button_base_left.png";
+            let rightButtonImage = "./screens/office/buttons/button_base_right.png";
 
             let officeImage = "./screens/office/office_base.png";
 
             if (leftDoorClosed && leftLightOn) {
-                leftButtonImage = './screens/office/buttons/button_door_light.png';
+                leftButtonImage = './screens/office/buttons/button_door_light_left.png';
             } else if (leftDoorClosed) {
-                leftButtonImage = './screens/office/buttons/button_door.png';
+                leftButtonImage = './screens/office/buttons/button_door_left.png';
             } else if (leftLightOn) {
-                leftButtonImage = './screens/office/buttons/button_light.png';
+                leftButtonImage = './screens/office/buttons/button_light_left.png';
             }
 
             if (rightDoorClosed && rightLightOn) {
-                rightButtonImage = './screens/office/buttons/button_door_light.png';
+                rightButtonImage = './screens/office/buttons/button_door_light_right.png';
             } else if (rightDoorClosed) {
-                rightButtonImage = './screens/office/buttons/button_door.png';
+                rightButtonImage = './screens/office/buttons/button_door_right.png';
             } else if (rightLightOn) {
-                rightButtonImage = './screens/office/buttons/button_light.png';
+                rightButtonImage = './screens/office/buttons/button_light_right.png';
             }
 
-            if (leftLightOn && rightLightOn) {
-                officeImage = './screens/office/office_both.png';
-            } else if (leftLightOn) {
+            if (leftLightOn) {
                 if (bonnieOnDoor) {
                     officeImage = './screens/office/office_bonnie.png';
                 } else {
