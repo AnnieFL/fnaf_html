@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        html {
+            background-color: black;
+            user-select: none;
+        }
+
+        body {
+            margin: 0px !important;
+            overflow: hidden;
+        }
+
+        .screen>img {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .button_left {
+            position: absolute;
+            left: 0px;
+            top: 40vh;
+        }
+
+        .button_right {
+            position: absolute;
+            right: 0px;
+            top: 40vh;
+            transform: rotateY(180deg);
+        }
+
+        .button>img {
+            height: 25vh;
+            width: 5vw;
+        }
+
+        .button_left_hitbox {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: absolute;
+            left: 5px;
+            top: 42vh;
+            z-index: 999;
+            height: 19vh;
+            width: 5vw;
+        }
+
+        .button_right_hitbox {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: absolute;
+            right: 5px;
+            top: 42vh;
+            z-index: 999;
+            height: 19vh;
+            width: 5vw;
+        }
+
+        .button_hitbox>* {
+            height: 8vh;
+            width: 5vw;
+        }
+
+        .door_left {
+            position: absolute;
+            left: 5vw;
+            transform: rotateY(180deg);
+            top: 0px;
+        }
+
+        .door_right {
+            position: absolute;
+            right: 5vw;
+            top: 0px;
+        }
+
+        .door>img {
+            height: 100vh;
+            width: 13vw;
+        }
+
+        .none {
+            display: none;
+        }
+
+        .close_door {
+            animation: close_door 50ms linear 0ms forwards;
+            transform-origin:  top;
+        }
+
+        .open_door {
+            animation: open_door 50ms linear 0ms forwards;
+            transform-origin:  top;
+        }
+
+        @keyframes close_door {
+            0% {
+                transform: scaleY(0);
+            }
+
+            100% {
+                transform: scaleY(1);
+            }
+        }
+
+        @keyframes open_door {
+            0% {
+                transform: scaleY(1);
+            }
+
+            100% {
+                transform: scaleY(0);
+            }
+        }
+    </style>
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="screen">
+        <img id='main' src="./screens/office/office_base.png">
+    </div>
+    <div class="button button_left">
+        <img id='left_buttons' src="./screens/office/buttons/button_base.png">
+    </div>
+    <div class="button button_right">
+        <img id='right_buttons' src="./screens/office/buttons/button_base.png">
+    </div>
+
+    <div class="door_left door">
+        <img id="left_door" class="none open_door" src="./screens/office/doors/door.png" />
+    </div>
+
+    <div class="door_right door">
+        <img id="right_door" class="none open_door" src="./screens/office/doors/door.png" />
+    </div>
+
+    <div class="button_left_hitbox button_hitbox">
+        <div id="button_left_door_hitbox" onclick="toggleDoor('left')"></div>
+        <div id="button_left_light_hitbox" onclick="toggleLight('left')"></div>
+    </div>
+    <div class="button_right_hitbox button_hitbox">
+        <div id="button_right_door_hitbox" onclick="toggleDoor('right')"></div>
+        <div id="button_right_light_hitbox" onclick="toggleLight('right')"></div>
+    </div>
+</body>
+<script>
+    var leftDoorClosed = false;
+    var leftLightOn = false;
+    
+    var rightDoorClosed = false;
+    var rightLightOn = false;
+
+    var bonnieOnDoor = false;
+    var chicaOnDoor = false;
+
+    var dead = false;
+    var deathCause = '';
+
+    function toggleDoor(side) {
+        if (side == 'left') {
+            leftDoorClosed = !leftDoorClosed;
+            document.getElementById('left_door').classList.remove('none');
+            document.getElementById('left_door').classList.toggle('open_door');
+            document.getElementById('left_door').classList.toggle('close_door');
+        } else if (side == 'right') {
+            rightDoorClosed = !rightDoorClosed;
+            document.getElementById('right_door').classList.remove('none');
+            document.getElementById('right_door').classList.toggle('open_door');
+            document.getElementById('right_door').classList.toggle('close_door');
+        }
+    }
+
+    function toggleLight(side) {
+        if (side == 'left') {
+            rightLightOn = false;
+            leftLightOn = !leftLightOn;
+        } else if (side == 'right') {
+            leftLightOn = false;
+            rightLightOn = !rightLightOn;
+        }
+    }
+
+    function randomBonnie() {
+        setTimeout(() => {
+            if (Math.random()*20 <= 9) {
+                if (bonnieOnDoor && !leftDoorClosed) {
+                    dead = true;
+                    deathCause = 'BONNIE';
+                    setTimeout(() => {
+                        document.body.classList.add('none');
+                    }, 1000)
+                } else if (bonnieOnDoor && leftDoorClosed) {
+                    bonnieOnDoor = false;
+                } else {
+                    bonnieOnDoor = true;
+                }
+            } 
+            randomBonnie();
+        },4000)
+    }
+
+    function randomChica() {
+        setTimeout(() => {
+            if (Math.random() * 20 <= 11) {
+                if (chicaOnDoor && !rightDoorClosed) {
+                    dead = true;
+                    deathCause = 'CHICA';
+                    setTimeout(() => {
+                        document.body.classList.add('none');
+                    }, 1000)
+                } else if (chicaOnDoor && rightDoorClosed) {
+                    chicaOnDoor = false;
+                } else {
+                    chicaOnDoor = true;
+                }
+            }
+            randomChica();
+        }, 4000)
+    }
+
+    function render() {
+        setTimeout(() => {
+            let leftButtonImage = "./screens/office/buttons/button_base.png";
+            let rightButtonImage = "./screens/office/buttons/button_base.png";
+
+            let officeImage = "./screens/office/office_base.png";
+
+            if (leftDoorClosed && leftLightOn) {
+                leftButtonImage = './screens/office/buttons/button_door_light.png';
+            } else if (leftDoorClosed) {
+                leftButtonImage = './screens/office/buttons/button_door.png';
+            } else if (leftLightOn) {
+                leftButtonImage = './screens/office/buttons/button_light.png';
+            }
+
+            if (rightDoorClosed && rightLightOn) {
+                rightButtonImage = './screens/office/buttons/button_door_light.png';
+            } else if (rightDoorClosed) {
+                rightButtonImage = './screens/office/buttons/button_door.png';
+            } else if (rightLightOn) {
+                rightButtonImage = './screens/office/buttons/button_light.png';
+            }
+
+            if (leftLightOn && rightLightOn) {
+                officeImage = './screens/office/office_both.png';
+            } else if (leftLightOn) {
+                if (bonnieOnDoor) {
+                    officeImage = './screens/office/office_bonnie.png';
+                } else {
+                    officeImage = './screens/office/office_left.png';
+                }
+            } else if (rightLightOn) {
+                if (chicaOnDoor) {
+                    officeImage = './screens/office/office_chica.png';
+                } else {
+                    officeImage = './screens/office/office_right.png';
+                }
+            }
+
+            if ((leftLightOn || rightLightOn) && Math.random()*20 <= 2) {
+                officeImage = './screens/office/office_base.png';
+            }
+
+            if (dead) {
+                document.getElementById('left_door').classList.add('none');
+                document.getElementById('right_door').classList.add('none');
+                document.getElementById('left_buttons').classList.add('none');
+                document.getElementById('right_buttons').classList.add('none');
+                
+            if (deathCause == 'BONNIE') {
+                officeImage = './screens/jumpscares/bonnie_jump.gif';
+            } else if (deathCause == 'CHICA') {
+                officeImage = './screens/jumpscares/chica_jump.gif';
+            }
+        }
+            
+            document.getElementById('left_buttons').src = leftButtonImage;
+            document.getElementById('right_buttons').src = rightButtonImage;
+            document.getElementById('main').src = officeImage;
+
+
+            if (!dead) {
+                render();
+            }
+        }, 10)
+    }
+
+    render()
+    randomBonnie();
+    randomChica();
+</script>
+
+</html>
