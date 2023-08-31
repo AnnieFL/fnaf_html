@@ -9,7 +9,7 @@
         * {
             user-select: none;
         }
-        
+
         html {
             background-color: black;
             user-select: none;
@@ -137,7 +137,7 @@
 
         .camera_map {
             position: absolute;
-            bottom: 0px;
+            bottom: 15vh;
             right: 0px;
         }
 
@@ -234,6 +234,41 @@
             top: -12vh;
             left: 27vw;
         }
+
+        .flip_camera_hitbox {
+            position: absolute;
+            left: 20vw;
+            bottom: 0px;
+            height: 13vh;
+            width: 60vw;
+        }
+
+        .flip_camera_draw {
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            bottom: 6vh;
+            height: 7vh;
+            width: 60vw;
+            border: 3px solid rgba(128, 128, 128, 0.473);
+            background-color: rgba(68, 68, 68, 0.267);
+            border-radius: 5px;
+        }
+
+        .flip_camera_draw>img {
+            height: 5vh;
+            width: 30%;
+            opacity: 0.5;
+        }
+
+        .camera_animation>img {
+            position: absolute;
+            width: 100vw;
+            height: 100vh;
+            left: 0px;
+            top: 0px;
+        }
     </style>
     <title>Document</title>
 </head>
@@ -266,6 +301,12 @@
         <div id="button_right_light_hitbox" onclick="toggleLight('right')"></div>
     </div>
 
+    <div class="flip_camera_hitbox" onmouseenter="toggleCamera()" id="camera_flip">
+        <div class="flip_camera_draw">
+            <img src="./icons/arrows.png">
+        </div>
+    </div>
+
     <div class="camera_map none" id="camera_map">
         <img src="./icons/map.webp">
         <div class="cam_list">
@@ -283,9 +324,12 @@
         </div>
     </div>
 
-    <button style="position: absolute; top: 50vw; left:50vw" onclick="toggleCamera()">Toggle Camera</button>
 
     <div class="honk_me" onclick="playAudio('./noises/honk.mp3')"></div>
+
+    <div id="camera_animation" class="camera_animation">
+    </div>
+
 </body>
 <script>
     var stopRender = false;
@@ -310,13 +354,13 @@
     var chicaDeath = false;
     var dead = false;
 
-    const BONNIE_AI = 10;
-    const CHICA_AI = 10;
+    const BONNIE_AI = 0;
+    const CHICA_AI = 0;
     const FOXY_AI = 0;
     const FREDDY_AI = 0;
 
-    function handlekey(e) {
-        console.log(e);
+    function randomRange(min, max) {
+        return Math.floor(Math.random() * (max - min) + min);
     }
 
     function playAudio(file, options = {}) {
@@ -377,13 +421,25 @@
 
     function toggleCamera() {
         //playAudio('./noises/camera_flip.mp3');
-        cameraUp = !cameraUp;
+        const img = document.createElement("img");
+        img.src = './screens/monitor_test.webp';
 
-        document.getElementById('camera_map').classList.toggle('none');
-        document.getElementById('left_door').classList.toggle('invisible');
-        document.getElementById('right_door').classList.toggle('invisible');
-        document.getElementById('left_buttons').classList.toggle('none');
-        document.getElementById('right_buttons').classList.toggle('none');
+        const id = `${Math.random() * 999}`
+        img.id = id;
+
+        document.getElementById('camera_animation').appendChild(img);
+
+        setTimeout(() => {
+            img.remove();
+            cameraUp = !cameraUp;
+
+
+            document.getElementById('camera_map').classList.toggle('none');
+            document.getElementById('left_door').classList.toggle('invisible');
+            document.getElementById('right_door').classList.toggle('invisible');
+            document.getElementById('left_buttons').classList.toggle('none');
+            document.getElementById('right_buttons').classList.toggle('none');
+        }, 700)
     }
 
     function changeCamera(camera) {
@@ -421,7 +477,7 @@
                 }
             }
             randomBonnie();
-        }, 4000)
+        }, randomRange(4000, 5000))
     }
 
     function randomChica() {
@@ -456,7 +512,7 @@
                 }
             }
             randomChica();
-        }, 4000)
+        }, randomRange(4000, 5000))
     }
 
     function randomFoxy() {
