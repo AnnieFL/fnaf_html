@@ -352,12 +352,21 @@
 
     var bonnieDeath = false;
     var chicaDeath = false;
+    var foxyRunning = false;
+    var foxyDeath = false;
     var dead = false;
 
     const BONNIE_AI = 0;
     const CHICA_AI = 0;
     const FOXY_AI = 0;
     const FREDDY_AI = 0;
+
+    var foxyStall = 10.5;
+    var foxyJumpscareStall = 0;
+    var gifPlaying;
+
+    var freddyAttackMode = false;
+    var freddyTimer = Math.max(1, 10000 - (FREDDY_AI * 1000));
 
     function randomRange(min, max) {
         return Math.floor(Math.random() * (max - min) + min);
@@ -433,7 +442,6 @@
             img.remove();
             cameraUp = !cameraUp;
 
-
             document.getElementById('camera_map').classList.toggle('none');
             document.getElementById('left_door').classList.toggle('invisible');
             document.getElementById('right_door').classList.toggle('invisible');
@@ -449,7 +457,6 @@
         currentCam = camera;
 
         document.getElementById(`cam${camPositions[currentCam]}`).classList.add('active_cam');
-
     }
 
     function randomBonnie() {
@@ -493,10 +500,10 @@
                         chicaPos = 1;
                     } else if (chicaPos == 1) {
                         chicaPos = Math.floor(Math.random() * 2) % 2 == 0 ? 6 : 5;
-                        if (chicaPos == 6) {
+                        if (chicaPos == 5) {
                             //playAudio('./noises/pots_pans.mp3', {repeat: 'pots_pans'})
                         }
-                    } else if (chicaPos == 6) {
+                    } else if (chicaPos == 5) {
                         chicaPos = Math.floor(Math.random() * 2) % 2 == 0 ? 5 : 9;
                         //stopAudio('pots_pans')
                     } else if (chicaPos == 5) {
@@ -517,16 +524,79 @@
 
     function randomFoxy() {
         setTimeout(() => {
-            if (Math.random() * 20 <= FOXY_AI) {
-                foxyPos++;
+            if (Math.random() * 20 <= FOXY_AI && foxyStall == 0) {
+                foxyPos = Math.min(3, foxyPos+1);
+                
+                if (foxyPos == 3) {
+                    if (!foxyRunning) {
+                        foxyRunning = true;
+                    } else if (!leftDoorClosed) {
+                        if (foxyJumpscareStall > 0) {
+                            setTimeout(() => {
+                                if (!leftDoorClosed) {
+                                    foxyDeath = true;
+                                } else {
+                                    foxyRunning = false;
+                                    foxyPos = 0;
+                                    foxyJumpscareStall = 0;
+                                }
+                            }, foxyJumpscareStall);
+                        } else {
+                            foxyDeath = true;
+                        }
+                    } else {
+                        foxyRunning = false;
+                        foxyPos = 0;
+                        foxyJumpscareStall = 0;
+                    }
+                }
             }
             randomFoxy();
         }, 4000)
     }
 
+    function randomFreddy() {
+        setTimeout(() => {
+            let timer;
+            if (freddyAttackMode) {
+                timer = freddyTimer;
+            } else {
+                timer = randomRange(4000, 5000)
+            }
+
+            if (Math.random() * 20 <= FREDDY_AI) {
+                if (freddyPos == -1 && !rightDoorClosed && cameraUp && camPositions[currentCam] != "4B") {
+                    freddyDeath = true;
+                } else {
+                    if (freddyPos == 0 && bonniePos != 0 && chicaPos != 0) {
+                        freddyPos = 1;
+                    } else if (freddyPos == 1) {
+                        freddyPos = 6;
+                        if (chicaPos == 6) {
+                            //playAudio('./noises/pots_pans.mp3', {repeat: 'pots_pans'})
+                        }
+                    } else if (chicaPos == 6) {
+                        chicaPos = Math.floor(Math.random() * 2) % 2 == 0 ? 5 : 9;
+                        //stopAudio('pots_pans')
+                    } else if (chicaPos == 5) {
+                        chicaPos = Math.floor(Math.random() * 2) % 2 == 0 ? 6 : 9;
+                        if (chicaPos == 6) {
+                            //playAudio('./noises/pots_pans.mp3', {repeat: 'pots_pans'})
+                        }
+                    } else if (chicaPos == 9) {
+                        chicaPos = Math.floor(Math.random() * 2) % 2 == 0 ? 10 : 1;
+                    } else if (chicaPos == 10) {
+                        chicaPos = Math.floor(Math.random() * 2) % 2 == 0 ? 9 : -1;
+                    }
+                }
+            }
+            randomFreddy();
+        }, timer)
+    }
+
     function tryJumpscare() {
         setTimeout(() => {
-            if ((chicaDeath || bonnieDeath) && cameraUp) {
+            if ((chicaDeath || bonnieDeath) && cameraUp || foxyDeath) {
                 dead = true;
                 setTimeout(() => {
                     if (cameraUp) {
@@ -546,12 +616,14 @@
                         officeImage = './screens/jumpscares/chica_jump.webp';
                     } else if (chicaDeath && bonnieDeath) {
                         officeImage = Math.floor(Math.random() * 10) % 2 == 0 ? './screens/jumpscares/bonnie_jump.webp' : './screens/jumpscares/chica_jump.webp';
+                    } else if (foxyDeath) {
+                        officeImage = './screens/jumpscares/foxy_jump.webp';
                     }
 
                     document.getElementById('main').src = officeImage;
                     setTimeout(() => {
                         document.body.classList.add('none');
-                    }, 1000)
+                    }, 800)
                 }, Math.floor(Math.random() * 3000));
             }
 
@@ -602,34 +674,56 @@
                 if ((leftLightOn || rightLightOn) && Math.random() * 20 <= 2) {
                     officeImage = './screens/office/office_base.png';
                 }
+                gifPlaying = false;
 
                 document.getElementById('left_buttons').src = leftButtonImage;
                 document.getElementById('right_buttons').src = rightButtonImage;
                 document.getElementById('main').src = officeImage;
             } else {
                 let currentScreen = `./screens/${camPositions[currentCam]}/cam`;
+                foxyStall = randomRange(500, 1000);
 
-                if (camPositions[currentCam] != "1C" && camPositions[currentCam] != '6' && !(camPositions[currentCam] == "2A" && foxyPos == 4)) {
-                    if (bonniePos == currentCam) {
-                        currentScreen += "_bonnie";
-                    }
-                    if (chicaPos == currentCam) {
-                        currentScreen += "_chica";
-                    }
-                    if (freddyPos == currentCam) {
-                        currentScreen += "_freddy";
-                    }
-                } else if (camPositions[currentCam] == '1C') {
+                if (camPositions[currentCam] == '1C') {
                     currentScreen += `_foxy${foxyPos}`;
-                } else if (camPositions[currentCam] == '2A' && foxyPos == 3) {
-                    currentScreen += `_foxy_schmoovin`;
+                    gifPlaying = false;
+                } else if (camPositions[currentCam] == '2A' && foxyPos == 3 && foxyRunning) {
+                    if (foxyJumpscareStall == 0) {
+                        //playAudio("./noises/schmoove.mp3");
+                        foxyJumpscareStall = 2000;
+                        gifPlaying = true;
+                        currentScreen += `_foxy_schmoovin.webp`;
+                        document.getElementById('main').src = currentScreen;
+                    } else if (foxyJumpscareStall > 1550) {
+                        foxyJumpscareStall-= 10;
+                        gifPlaying = true;
+                    } else {
+                        gifPlaying = false;
+                    }
+                    
+                } else if (camPositions[currentCam] != '6') {
+                   if (bonniePos == currentCam) {
+                       currentScreen += "_bonnie";
+                   }
+                   if (chicaPos == currentCam) {
+                       currentScreen += "_chica";
+                   }
+                   if (freddyPos == currentCam) {
+                       currentScreen += "_freddy";
+                   }
+                   gifPlaying = false;
                 }
-                currentScreen += ".png";
 
-                document.getElementById('main').src = currentScreen;
+                if (!gifPlaying) {
+                    currentScreen += ".png";   
+                    document.getElementById('main').src = currentScreen;
+                }
             }
 
             if (!dead) {
+                if (foxyStall > 0) {
+                    foxyStall--;
+                }
+
                 render();
             }
         }, 10)
