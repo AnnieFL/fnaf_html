@@ -303,6 +303,17 @@
             text-align: right;
         }
 
+        .debug {
+            position: absolute;
+            width: 10vw;
+            height: 5vh;
+            top: 50vh;
+            right: 50vw;
+            color: white;
+            font-size: 5vh;
+            text-align: right;
+        }
+
     </style>
     <title>Totally real and official fnaf game</title>
 </head>
@@ -373,6 +384,9 @@
     <div class="time">
         <span id="current_time"></span>
     </div>
+        <div class="debug">
+            <span id="debug_txt"></span>
+        </div>
 
 </body>
 <script>
@@ -401,12 +415,13 @@
     
     const BONNIE_AI = 0;
     const CHICA_AI = 0;
-    const FOXY_AI = 0;
+    const FOXY_AI = 20;
     const FREDDY_AI = 0;
     
-    var foxyStall = 10.5;
+    var foxyStall = randomRange(500, 1000);
     var foxyRunning = false;
     var foxyJumpscareStall = 0;
+    var foxyTimeoutSet = false;
     var gifPlaying;
 
     var freddyAttackMode = false;
@@ -586,10 +601,10 @@
 
     function randomFoxy() {
         setTimeout(() => {
-            if (Math.random() * 20 <= FOXY_AI && foxyStall == 0) {
+            if (Math.random() * 20 <= FOXY_AI && (foxyStall == 0 || foxyRunning)) {
                 foxyPos = Math.min(3, foxyPos+1);
                 
-                if (foxyPos == 3) {
+                if (foxyPos == 3 && !foxyTimeoutSet) {
                     if (!foxyRunning) {
                         foxyRunning = true;
                     } else if (!leftDoorClosed) {
@@ -601,8 +616,10 @@
                                     foxyRunning = false;
                                     foxyPos = 0;
                                     foxyJumpscareStall = 0;
+                                    foxyTimeoutSet = false;
                                 }
                             }, foxyJumpscareStall);
+                            foxyTimeoutSet = true;
                         } else {
                             foxyDeath = true;
                         }
@@ -752,11 +769,11 @@
                 } else if (camPositions[currentCam] == '2A' && foxyPos == 3 && foxyRunning) {
                     if (foxyJumpscareStall == 0) {
                         //playAudio("./noises/schmoove.mp3");
-                        foxyJumpscareStall = 2000;
+                        foxyJumpscareStall = 1000;
                         gifPlaying = true;
                         currentScreen += `_foxy_schmoovin.webp`;
                         document.getElementById('main').src = currentScreen;
-                    } else if (foxyJumpscareStall > 1550) {
+                    } else if (foxyJumpscareStall > 550) {
                         foxyJumpscareStall-= 10;
                         gifPlaying = true;
                     } else {
@@ -781,6 +798,8 @@
                     document.getElementById('main').src = currentScreen;
                 }
             }
+
+            document.getElementById("debug_txt").innerText = foxyJumpscareStall + "\n"+foxyPos;
 
             document.getElementById('power_percentage').innerText = Math.floor(powerPercentage) + "%";
             document.getElementById('current_night').innerText = "Night " + CURRENT_NIGHT;
