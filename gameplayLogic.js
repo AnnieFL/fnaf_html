@@ -21,10 +21,12 @@ let chicaDeath = false;
 let foxyDeath = false;
 let freddyDeath = false;
 
-const BONNIE_AI = 0;
-const CHICA_AI = 0;
-const FOXY_AI = 20;
-const FREDDY_AI = 0;
+const urlParams = new URLSearchParams(window.location.search);
+
+const BONNIE_AI = parseInt(urlParams.get("bonnie")) || 0;
+const CHICA_AI = parseInt(urlParams.get("chica")) || 0;
+const FOXY_AI = parseInt(urlParams.get("foxy")) || 0;
+const FREDDY_AI = parseInt(urlParams.get("freddy")) || 0;
 
 let foxyStall = randomRange(500, 1000);
 let foxyRunning = false;
@@ -33,7 +35,7 @@ let foxyTimeoutSet = false;
 let gifPlaying;
 
 let freddyAttackMode = false;
-let freddyTimer = Math.max(1, 10000 - (FREDDY_AI * 1000));
+let freddyTimer = Math.max(50, 10000 - (FREDDY_AI * 1000));
 
 let powerPercentage = 100;
 const CURRENT_NIGHT = 7;
@@ -79,60 +81,66 @@ function stopAudio(name) {
 }
 
 function toggleDoor(side) {
-    if (side == 'left' && !bonnieDeath) {
-        leftDoorClosed = !leftDoorClosed;
-        document.getElementById('left_door').classList.remove('invisible');
-        document.getElementById('left_door').classList.toggle('open_door');
-        document.getElementById('left_door').classList.toggle('close_door');
-    } else if (side == 'right' && !chicaDeath) {
-        rightDoorClosed = !rightDoorClosed;
-        document.getElementById('right_door').classList.remove('invisible');
-        document.getElementById('right_door').classList.toggle('open_door');
-        document.getElementById('right_door').classList.toggle('close_door');
-    }
-    if ((side === 'left' && !bonnieDeath) || side === 'right' && !chicaDeath) {
-        playAudio('./noises/door_slam.mp3');
-    } else {
-        //playAudio('./noises/dud.mp3');
-    }
+    if (powerPercentage > 0 || side == 'left' && leftDoorClosed || side == 'right' && rightDoorClosed) {
+        if (side == 'left' && !bonnieDeath) {
+            leftDoorClosed = !leftDoorClosed;
+            document.getElementById('left_door').classList.remove('invisible');
+            document.getElementById('left_door').classList.toggle('open_door');
+            document.getElementById('left_door').classList.toggle('close_door');
+        } else if (side == 'right' && !chicaDeath) {
+            rightDoorClosed = !rightDoorClosed;
+            document.getElementById('right_door').classList.remove('invisible');
+            document.getElementById('right_door').classList.toggle('open_door');
+            document.getElementById('right_door').classList.toggle('close_door');
+        }
+        if ((side === 'left' && !bonnieDeath) || side === 'right' && !chicaDeath) {
+            //playAudio('./noises/door_slam.mp3');
+        } else {
+            //playAudio('./noises/dud.mp3');
+        }
+}
 }
 
 function toggleLight(side) {
-    if (side == 'left' && !bonnieDeath) {
-        rightLightOn = false;
-        leftLightOn = !leftLightOn;
-        //playAudio('./noises/light.mp3');
-    } else if (side == 'right' && !chicaDeath) {
-        leftLightOn = false;
-        rightLightOn = !rightLightOn;
-        //playAudio('./noises/light.mp3');
-    } else {
-        leftLightOn = false;
-        rightLightOn = false;
-        //playAudio('./noises/dud.mp3');
-    }
+    if (powerPercentage > 0 || side == 'left' && leftLightOn || side == 'right' && rightLightOn) {
+        if (side == 'left' && !bonnieDeath) {
+            rightLightOn = false;
+            leftLightOn = !leftLightOn;
+            //playAudio('./noises/light.mp3');
+        } else if (side == 'right' && !chicaDeath) {
+            leftLightOn = false;
+            rightLightOn = !rightLightOn;
+            //playAudio('./noises/light.mp3');
+        } else {
+            leftLightOn = false;
+            rightLightOn = false;
+            //playAudio('./noises/dud.mp3');
+        }
+}
 }
 
 function toggleCamera() {
-    //playAudio('./noises/camera_flip.mp3');
-    const img = document.createElement("img");
-    img.src = './screens/monitor_test.webp';
+    if (powerPercentage > 0 || cameraUp) {
+        //playAudio('./noises/camera_flip.mp3');
+        const img = document.createElement("img");
+        img.src = './screens/monitor_test.webp';
 
-    const id = `${Math.random() * 999}`
-    img.id = id;
+        const id = `${Math.random() * 999}`
+        img.id = id;
 
-    document.getElementById('camera_animation').appendChild(img);
+        document.getElementById('camera_animation').appendChild(img);
 
-    setTimeout(() => {
-        img.remove();
-        cameraUp = !cameraUp;
+        setTimeout(() => {
+            img.remove();
+            cameraUp = !cameraUp;
 
-        document.getElementById('camera_map').classList.toggle('none');
-        document.getElementById('left_door').classList.toggle('invisible');
-        document.getElementById('right_door').classList.toggle('invisible');
-        document.getElementById('left_buttons').classList.toggle('none');
-        document.getElementById('right_buttons').classList.toggle('none');
-    }, 700)
+            document.getElementById('camera_map').classList.toggle('none');
+            document.getElementById('left_door').classList.toggle('invisible');
+            document.getElementById('right_door').classList.toggle('invisible');
+            document.getElementById('left_buttons').classList.toggle('none');
+            document.getElementById('right_buttons').classList.toggle('none');
+        }, 700)
+    }
 }
 
 function changeCamera(camera) {
@@ -146,7 +154,7 @@ function changeCamera(camera) {
 
 function randomBonnie() {
     setTimeout(() => {
-        if (Math.random() * 20 <= BONNIE_AI) {
+        if (Math.random() * 20 <= BONNIE_AI && powerPercentage > 0) {
             if (bonniePos == -1 && !leftDoorClosed) {
                 leftLightOn = false;
                 bonnieDeath = true;
@@ -174,7 +182,7 @@ function randomBonnie() {
 
 function randomChica() {
     setTimeout(() => {
-        if (Math.random() * 20 <= CHICA_AI) {
+        if (Math.random() * 20 <= CHICA_AI && powerPercentage > 0) {
             if (chicaPos == -1 && !rightDoorClosed) {
                 rightLightOn = false;
                 //chicaDeath = true;
@@ -209,7 +217,7 @@ function randomChica() {
 
 function randomFoxy() {
     setTimeout(() => {
-        if (Math.random() * 20 <= FOXY_AI && (foxyStall == 0 || foxyRunning)) {
+        if (Math.random() * 20 <= FOXY_AI && (foxyStall == 0 || foxyRunning) && powerPercentage > 0) {
             foxyPos = Math.min(3, foxyPos + 1);
 
             if (foxyPos == 3 && !foxyTimeoutSet) {
@@ -252,7 +260,7 @@ function randomFreddy() {
 
     setTimeout(() => {
 
-        if ((Math.random() * 20 <= FREDDY_AI || freddyAttackMode) && !freddyDeath) {
+        if ((Math.random() * 20 <= FREDDY_AI || freddyAttackMode) && !freddyDeath && powerPercentage > 0) {
             if (!freddyAttackMode) {
                 freddyAttackMode = true;
             }
@@ -323,6 +331,25 @@ function tryJumpscare() {
 
 function render() {
     setTimeout(() => {
+
+        if (powerPercentage <= 0) {
+            if (leftDoorClosed) {
+                toggleDoor('left');
+            }
+            if (rightDoorClosed) {
+                toggleDoor('right');
+            }
+            if (cameraUp) {
+                toggleCamera();
+            }
+            if (rightLightOn) {
+                toggleLight('right');
+            }
+            if (leftLightOn) {
+                toggleLight('left');
+            }
+        } 
+
         if (!cameraUp) {
             let leftButtonImage = "./screens/office/buttons/button_base_left.png";
             let rightButtonImage = "./screens/office/buttons/button_base_right.png";
@@ -362,11 +389,17 @@ function render() {
             if ((leftLightOn || rightLightOn) && Math.random() * 20 <= 2) {
                 officeImage = './screens/office/office_base.png';
             }
-            gifPlaying = false;
 
-            document.getElementById('left_buttons').src = leftButtonImage;
-            document.getElementById('right_buttons').src = rightButtonImage;
-            document.getElementById('main').src = officeImage;
+            gifPlaying = false;
+            if (powerPercentage <= 0) {
+                document.getElementById('left_buttons').remove();
+                document.getElementById('right_buttons').remove();
+                document.getElementById('main').src = officeImage;
+            } else {
+                document.getElementById('left_buttons').src = leftButtonImage;
+                document.getElementById('right_buttons').src = rightButtonImage;
+                document.getElementById('main').src = officeImage;
+            }
         } else {
             let currentScreen = `./screens/${camPositions[currentCam]}/cam`;
             foxyStall = randomRange(500, 1000);
@@ -403,17 +436,23 @@ function render() {
 
             if (!gifPlaying) {
                 currentScreen += ".png";
+
                 document.getElementById('main').src = currentScreen;
             }
         }
 
-        document.getElementById("debug_txt").innerText = foxyJumpscareStall + "\n" + foxyPos;
 
-        document.getElementById('power_percentage').innerText = Math.floor(powerPercentage) + "%";
-        document.getElementById('current_night').innerText = "Night " + CURRENT_NIGHT;
-        document.getElementById('current_time').innerText = currentTime + "AM";
+        if (powerPercentage <= 0) {
+            document.getElementById('power_percentage').innerText = "";
+            document.getElementById('current_night').innerText = "";
+            document.getElementById('current_time').innerText = "";
+        } else {
+            document.getElementById('power_percentage').innerText = Math.max(Math.floor(powerPercentage), 0) + "%";
+            document.getElementById('current_night').innerText = "Night " + CURRENT_NIGHT;
+            document.getElementById('current_time').innerText = currentTime + "AM";
+        }
 
-        if (!dead) {
+        if (!dead && !win) {
             if (foxyStall > 0) {
                 foxyStall--;
             }
@@ -421,19 +460,19 @@ function render() {
                 let powerDrain = passivePowerDrain;
 
                 if (leftDoorClosed) {
-                    powerDrain += 0.0001;
+                    powerDrain += 0.0015;
                 }
                 if (rightDoorClosed) {
-                    powerDrain += 0.0001;
+                    powerDrain += 0.0015;
                 }
-                if (leftLightOn) {
-                    powerDrain += 0.0001;
+                if (leftLightOn || rightLightOn) {
+                    powerDrain += 0.00075;
                 }
-                if (rightLightOn) {
-                    powerDrain += 0.0001;
+                if (cameraUp) {
+                    powerDrain += 0.005;
                 }
 
-                powerPercentage -= passivePowerDrain;
+                powerPercentage -= powerDrain;
             }
             if (timeCount > 9000) {
                 if (currentTime == 12) {
@@ -450,6 +489,10 @@ function render() {
             }
 
             render();
+        } else if (win) {
+
+        } else {
+
         }
     }, 10)
 }
