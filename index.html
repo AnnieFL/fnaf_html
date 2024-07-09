@@ -37,7 +37,7 @@
         <div id="button_right_light_hitbox" onclick="toggleLight('right')"></div>
     </div>
 
-    <div class="flip_camera_hitbox" onmouseenter="toggleCamera()" id="camera_flip">
+    <div class="flip_camera_hitbox" onclick="toggleCamera()" id="camera_flip">
         <div class="flip_camera_draw">
             <img src="./icons/arrows.png">
         </div>
@@ -78,6 +78,11 @@
         <div class="debug">
             <span id="debug_txt"></span>
         </div>
+
+    <div class="win_text win_text_wrapper none">
+        <div class="win_text win_text_hour">5</div>
+        <div class="win_text">AM</div>
+    </div>
 
 </body>
 <script src="./gameplayLogic.js"></script>

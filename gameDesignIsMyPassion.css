@@ -90,7 +90,9 @@ body {
 }
 
 .none {
-    display: none;
+    display: none !important;
+    height: 0px !important;
+    width: 0px !important;
 }
 
 .invisible {
@@ -319,6 +321,24 @@ body {
     animation: fade_black 1000ms linear 0ms 1 forwards;
 }
 
+.fade_in {
+    animation: fade_in 1000ms linear 0ms 1 forwards;
+}
+
+.win_text_wrapper {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    height: 100vh;
+    width: 100vw;
+    color: white;
+    font-size: 10em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+}
+
 @keyframes fade_black {
     0% {
         opacity: 1;
@@ -326,5 +346,15 @@ body {
 
     100% {
         opacity: 0;
+    }
+}
+
+@keyframes fade_in {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
     }
 }

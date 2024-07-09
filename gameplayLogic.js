@@ -33,7 +33,8 @@ let foxyTimeoutSet = false;
 let gifPlaying;
 
 let freddyAttackMode = false;
-let freddyTimer = Math.max(300, 10000 - (FREDDY_AI * 1000));
+let freddyTimer = Math.max(1000, 10000 - (FREDDY_AI * 1000));
+let schoolSafeMode = urlParams.get("safe") == "true" || false;
 
 let powerPercentage = 100;
 const CURRENT_NIGHT = 7;
@@ -63,23 +64,45 @@ function playAudio(file, options = {}) {
     audio.autoplay = true;
     audio.src = file;
     audio.type = 'audio/mp3';
+    if (options?.volume) {
+        audio.volume = options.volume;
+    }
 
-    const id = `${Math.random() * 999}`
+    let id = `${Math.random() * 999}`
+    if (options?.repeat && !document.getElementById(options.repeat)) {
+        id = options.repeat;
+        audio.loop = true;
+    }
     audio.id = id;
 
-    document.appendChild(audio);
+    document.body.appendChild(audio);
 
     setTimeout(() => {
-        audio.remove();
-    }, 5000)
+        if (!options?.repeat) {
+            audio.remove();
+        }
+    }, options?.duration || 5000)
 
+}
+
+function stopAllAudios() {
+    document.querySelectorAll("audio").forEach((audio) => {
+        audio.remove();
+    });
 }
 
 function stopAudio(name) {
+    const audio = document.getElementById(name);
 
+    if (audio) {
+        audio.remove();
+    }
 }
 
 function toggleDoor(side) {
+    if (win) {
+        return;
+    }
     if (powerPercentage > 0 || side == 'left' && leftDoorClosed || side == 'right' && rightDoorClosed) {
         if (side == 'left' && !bonnieDeath) {
             leftDoorClosed = !leftDoorClosed;
@@ -93,41 +116,60 @@ function toggleDoor(side) {
             document.getElementById('right_door').classList.toggle('close_door');
         }
         if ((side === 'left' && !bonnieDeath) || side === 'right' && !chicaDeath) {
-            //playAudio('./noises/door_slam.mp3');
+            playAudio('./noises/door_slam.mp3');
         } else {
-            //playAudio('./noises/dud.mp3');
+            playAudio('./noises/dud.mp3');
         }
 }
 }
 
 function toggleLight(side) {
+    if (win) {
+        return;
+    }
     if (powerPercentage > 0 || side == 'left' && leftLightOn || side == 'right' && rightLightOn) {
+        stopAudio('light');
         if (side == 'left' && !bonnieDeath) {
             rightLightOn = false;
+            if (!leftLightOn) {
+                playAudio('./noises/light.mp3', {repeat: 'light'});
+            }
             leftLightOn = !leftLightOn;
-            //playAudio('./noises/light.mp3');
         } else if (side == 'right' && !chicaDeath) {
             leftLightOn = false;
+            if (!rightLightOn) {
+                playAudio('./noises/light.mp3', { repeat: 'light' });
+            }
             rightLightOn = !rightLightOn;
-            //playAudio('./noises/light.mp3');
         } else {
             leftLightOn = false;
             rightLightOn = false;
-            //playAudio('./noises/dud.mp3');
+
+            playAudio('./noises/dud.mp3');
         }
     }
 }
 
 function toggleCamera() {
+    if (win) {
+        return;
+    }
+
     if (powerPercentage > 0 || cameraUp) {
-        //playAudio('./noises/camera_flip.mp3');
         const img = document.createElement("img");
-        img.src = './screens/monitor_test.webp';
+        if (cameraUp) {
+            img.src = './screens/monitor_down.webp';
+        } else {
+            img.src = './screens/monitor_up.webp';
+        }
 
         const id = `${Math.random() * 999}`
         img.id = id;
 
         document.getElementById('camera_animation').appendChild(img);
+        setTimeout(() => {
+            playAudio('./noises/camera_flip.mp3');
+        }, 10)
 
         let handleCamera;
 
@@ -157,13 +199,13 @@ function toggleCamera() {
         }
         setTimeout(() => {
             handleCamera();
-        }, 700)
+        }, 180)
 
     }
 }
 
 function changeCamera(camera) {
-    //playAudio('./noises/camera_swap.mp3');
+    playAudio('./noises/camera_swap.mp3');
     document.getElementById(`cam${camPositions[currentCam]}`).classList.remove('active_cam');
 
     currentCam = camera;
@@ -173,7 +215,7 @@ function changeCamera(camera) {
 
 function randomBonnie() {
     setTimeout(() => {
-        if (Math.random() * 20 <= BONNIE_AI && powerPercentage > 0) {
+        if (Math.random() * 20 <= BONNIE_AI && powerPercentage > 0 && !win) {
             if (bonniePos == currentCam && cameraUp) {
                 setCameraBlackout();
             }
@@ -205,14 +247,14 @@ function randomBonnie() {
 
 function randomChica() {
     setTimeout(() => {
-        if (Math.random() * 20 <= CHICA_AI && powerPercentage > 0) {
+        if (Math.random() * 20 <= CHICA_AI && powerPercentage > 0 && !win) {
             if (chicaPos == currentCam && cameraUp) {
                 setCameraBlackout();
             }
 
             if (chicaPos == -1 && !rightDoorClosed) {
                 rightLightOn = false;
-                //chicaDeath = true;
+                chicaDeath = true;
             } else if (chicaPos == -1 && rightDoorClosed) {
                 chicaPos = 9;
             } else {
@@ -221,15 +263,19 @@ function randomChica() {
                 } else if (chicaPos == 1) {
                     chicaPos = Math.floor(Math.random() * 2) % 2 == 0 ? 6 : 5;
                     if (chicaPos == 5) {
-                        //playAudio('./noises/pots_pans.mp3', {repeat: 'pots_pans'})
+                        setTimeout(() => {
+                            playAudio('./noises/pots_pans.mp3', { repeat: 'pots_pans', volume: 0.05 })
+                        }, 10);
                     }
                 } else if (chicaPos == 5) {
                     chicaPos = Math.floor(Math.random() * 2) % 2 == 0 ? 6 : 9;
-                    //stopAudio('pots_pans')
-                } else if (chicaPos == 5) {
+                    stopAudio('pots_pans')
+                } else if (chicaPos == 6) {
                     chicaPos = Math.floor(Math.random() * 2) % 2 == 0 ? 5 : 9;
                     if (chicaPos == 5) {
-                        //playAudio('./noises/pots_pans.mp3', {repeat: 'pots_pans'})
+                        setTimeout(() => {
+                            playAudio('./noises/pots_pans.mp3', { repeat: 'pots_pans', volume: 0.05 })
+                        }, 10);
                     }
                 } else if (chicaPos == 9) {
                     chicaPos = Math.floor(Math.random() * 2) % 2 == 0 ? 10 : 1;
@@ -244,11 +290,12 @@ function randomChica() {
 
 function randomFoxy() {
     setTimeout(() => {
-        if (Math.random() * 20 <= FOXY_AI && (foxyStall == 0 || foxyRunning) && powerPercentage > 0) {
+        if (Math.random() * 20 <= FOXY_AI && (foxyStall == 0 || foxyRunning) && powerPercentage > 0 && !win) {
             foxyPos = Math.min(3, foxyPos + 1);
 
             if (foxyPos == 3 && !foxyTimeoutSet) {
                 if (!foxyRunning) {
+                    alert('he movin')
                     foxyRunning = true;
                 } else if (!leftDoorClosed) {
                     if (foxyJumpscareStall > 0) {
@@ -260,6 +307,8 @@ function randomFoxy() {
                                 foxyPos = 0;
                                 foxyJumpscareStall = 0;
                                 foxyTimeoutSet = false;
+                                powerPercentage-=5;
+                                playAudio('./noises/foxy_knock.mp3');
                             }
                         }, foxyJumpscareStall);
                         foxyTimeoutSet = true;
@@ -267,8 +316,10 @@ function randomFoxy() {
                         foxyDeath = true;
                     }
                 } else {
+                    playAudio('./noises/foxy_knock.mp3');
                     foxyRunning = false;
                     foxyPos = 0;
+                    powerPercentage -= 5;
                     foxyJumpscareStall = 0;
                 }
             }
@@ -287,14 +338,23 @@ function randomFreddy() {
 
     setTimeout(() => {
 
-        if ((Math.random() * 20 <= FREDDY_AI || freddyAttackMode) && !freddyDeath && powerPercentage > 0 && currentCam != freddyPos) {
+        if ((Math.random() * 20 <= FREDDY_AI || freddyAttackMode) && !freddyDeath && powerPercentage > 0 && currentCam != freddyPos && !win) {
+            setTimeout(() => {
+                if (!freddyDeath) {
+                    playAudio("./noises/freddy_laugh"+Math.ceil(Math.random()*3)+".mp3");
+                }
+            }, 10);
+            
             if (!freddyAttackMode) {
                 freddyAttackMode = true;
             }
 
-            if (freddyPos == 10 && !rightDoorClosed && cameraUp) {
+            if (freddyPos == 10 && !rightDoorClosed) {
                 freddyDeath = true;
                 freddyPos = -1;
+                setTimeout(() => {
+                    playAudio("./noises/freddy_laugh" + Math.ceil(Math.random() * 3) + ".mp3");
+                }, 10);
             } else {
                 if (freddyPos == 0 && bonniePos != 0 && chicaPos != 0) {
                     freddyPos = 1;
@@ -302,10 +362,10 @@ function randomFreddy() {
                     freddyPos = 6;
                 } else if (freddyPos == 6) {
                     freddyPos = 5;
-                    //playAudio('./noises/kitchen_song.mp3', {repeat: 'kitchen_song'})
+                    playAudio('./noises/freddy_song.mp3', { repeat: 'freddy_song', volume: 0.05})
                 } else if (freddyPos == 5) {
                     freddyPos = 9;
-                    //stopAudio('pots_pans')
+                    stopAudio('freddy_song')
                 } else if (freddyPos == 9) {
                     freddyPos = 10;
                 }
@@ -353,6 +413,13 @@ function tryJumpscare() {
 
                 document.getElementById('main').src = officeImage;
                 setTimeout(() => {
+                    if (schoolSafeMode) {  
+                        playAudio("./noises/safe_jumpscare.mp3");
+                    } else {
+                        playAudio("./noises/jumpscare.mp3");
+                    }
+                }, 10)
+                setTimeout(() => {
                     document.body.classList.add('none');
                 }, 800)
             }, Math.floor(Math.random() * 3000));
@@ -364,6 +431,8 @@ function tryJumpscare() {
     }, 10);
 }
 
+let playedBlackoutAudio = false;
+let playedWinAudio = false;
 function render() {
     setTimeout(() => {
 
@@ -384,6 +453,12 @@ function render() {
                 toggleLight('left');
             }
             document.getElementsByClassName('flip_camera_draw')[0].classList.add('invisible');
+            if (!playedBlackoutAudio) {
+                setTimeout(() => {
+                    playAudio('./noises/blackout.mp3', {duration: 12000})
+                }, 1);
+                playedBlackoutAudio = true;
+            }
         } 
 
         if (!cameraUp && !dead) {
@@ -429,8 +504,12 @@ function render() {
 
             gifPlaying = false;
             if (powerPercentage <= 0) {
-                document.getElementById('left_buttons').remove();
-                document.getElementById('right_buttons').remove();
+                if (document.getElementById('left_buttons')) {
+                    document.getElementById('left_buttons').remove();
+                }
+                if (document.getElementById('right_buttons')) {
+                    document.getElementById('right_buttons').remove();
+                }
                 officeImage = './screens/office/office_dark.png';
             } else {
                 document.getElementById('left_buttons').src = leftButtonImage;
@@ -446,7 +525,9 @@ function render() {
                 gifPlaying = false;
             } else if (camPositions[currentCam] == '2A' && foxyPos == 3 && foxyRunning) {
                 if (foxyJumpscareStall == 0) {
-                    //playAudio("./noises/schmoove.mp3");
+                    setTimeout(() => {
+                        playAudio("./noises/schmoovin.mp3");
+                    }, 10)
                     foxyJumpscareStall = 1000;
                     gifPlaying = true;
                     currentScreen += `_foxy_schmoovin.webp`;
@@ -522,7 +603,7 @@ function render() {
                 if (currentTime == 12) {
                     currentTime = 1;
                     timeCount = 0;
-                } else if (currentTime != 6) {
+                } else if (currentTime != 5) {
                     currentTime++;
                     timeCount = 0;
                 } else {
@@ -534,7 +615,35 @@ function render() {
 
             render();
         } else if (win) {
-            document.body.classList.add("fade_black");
+            stopAllAudios();
+            if (!playedWinAudio) {
+                playAudio('./noises/chimes.mp3', {duration: 20000});
+            }
+            document.body.querySelectorAll('div').forEach((div) => {
+                if (!div.classList.contains('win_text')) {
+                    div.classList.add("fade_black")
+                } else {
+                    div.classList.add('fade_in');
+
+                    if (div.classList.contains("win_text_hour")) {
+                        setTimeout(() => {
+                            div.classList.remove('fade_in');
+                            div.classList.add('fade_black');
+                            setTimeout(() => {
+                                div.textContent = "6";
+                                div.classList.remove('fade_black');
+                                div.classList.add('fade_in');
+                                setTimeout(() => {
+                                    const a = document.createElement('a');
+                                    a.href = './custom';
+                                    a.click();
+                                }, 5000)
+                            },3000)
+                        },3000)
+                    }
+                }
+            });
+
         } else {
             render();
         }
