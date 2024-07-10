@@ -18,6 +18,7 @@ let bonnieDeath = false;
 let chicaDeath = false;
 let foxyDeath = false;
 let freddyDeath = false;
+let freddyDarkDeath = false;
 
 const urlParams = new URLSearchParams(window.location.search);
 
@@ -385,7 +386,7 @@ function setCameraBlackout() {
 
 function tryJumpscare() {
     setTimeout(() => {
-        if ((chicaDeath || bonnieDeath || freddyDeath) && cameraUp || foxyDeath) {
+        if ((chicaDeath || bonnieDeath || freddyDeath) && cameraUp || foxyDeath || freddyDarkDeath) {
             dead = true;
             cameraBlackout = false;
             setTimeout(() => {
@@ -394,12 +395,16 @@ function tryJumpscare() {
                 }
                 let officeImage = '';
 
-                document.getElementById('left_door').classList.add('invisible');
-                document.getElementById('right_door').classList.add('invisible');
-                document.getElementById('left_buttons').classList.add('none');
-                document.getElementById('right_buttons').classList.add('none');
+                if (!freddyDarkDeath) {
+                    document.getElementById('left_door').classList.add('invisible');
+                    document.getElementById('right_door').classList.add('invisible');
+                    document.getElementById('left_buttons').classList.add('none');
+                    document.getElementById('right_buttons').classList.add('none');
+                }
 
-                if (bonnieDeath && !chicaDeath) {
+                if (freddyDarkDeath) {
+                    officeImage = './screens/jumpscares/freddy_jump_dark.webp';
+                } else if (bonnieDeath && !chicaDeath) {
                     officeImage = './screens/jumpscares/bonnie_jump.webp';
                 } else if (chicaDeath && !bonnieDeath) {
                     officeImage = './screens/jumpscares/chica_jump.webp';
@@ -429,6 +434,70 @@ function tryJumpscare() {
             tryJumpscare();
         }
     }, 10);
+}
+
+let blackoutStarted = false;
+let blackoutFreddySong = false;
+let blackoutDarkness = false;
+let nextPhaseAttempts = 0;
+function handleBlackout() {
+    blackoutStarted = true;
+
+    setTimeout(() => {
+        nextPhaseAttempts++;
+        if (!blackoutFreddySong) {
+            if (nextPhaseAttempts == 8 || Math.ceil(Math.random() * 100) < 20) {
+                blackoutFreddySong = true;
+                playAudio('./noises/freddy_song.mp3', {repeat: 'freddy_song'});
+                nextPhaseAttempts = 0;
+            }
+        } else if (!blackoutDarkness) {
+            if (nextPhaseAttempts == 12 || Math.ceil(Math.random() * 100) < 20) {
+                blackoutDarkness = true;
+                stopAudio('freddy_song');
+                nextPhaseAttempts = 0;
+            }
+        } else {
+            if (nextPhaseAttempts == 12 || Math.ceil(Math.random() * 100) < 20) {
+                freddyDarkDeath = true;
+            }
+        }
+
+        if (!win && !freddyDarkDeath) {
+            handleBlackout();
+        }
+    },1000);
+}
+
+function winNight() {
+    stopAllAudios();
+    if (!playedWinAudio) {
+        playAudio('./noises/chimes.mp3', {duration: 20000});
+    }
+    document.body.querySelectorAll('div').forEach((div) => {
+        if (!div.classList.contains('win_text')) {
+            div.classList.add("fade_black")
+        } else {
+            div.classList.add('fade_in');
+
+            if (div.classList.contains("win_text_hour")) {
+                setTimeout(() => {
+                    div.classList.remove('fade_in');
+                    div.classList.add('fade_black');
+                    setTimeout(() => {
+                        div.textContent = "6";
+                        div.classList.remove('fade_black');
+                        div.classList.add('fade_in');
+                        setTimeout(() => {
+                            const a = document.createElement('a');
+                            a.href = './custom';
+                            a.click();
+                        }, 5000)
+                    },3000)
+                },3000)
+            }
+        }
+    });
 }
 
 let playedBlackoutAudio = false;
@@ -510,7 +579,14 @@ function render() {
                 if (document.getElementById('right_buttons')) {
                     document.getElementById('right_buttons').remove();
                 }
-                officeImage = './screens/office/office_dark.png';
+
+                if (!blackoutFreddySong && !blackoutDarkness) {
+                    officeImage = './screens/office/office_dark.png';
+                } else if (blackoutDarkness) {
+                    officeImage = '';
+                } else if (blackoutFreddySong) {
+                    officeImage = Math.ceil(Math.random()*10) < 10 ? './screens/office/office_dark.png' : './screens/office/office_dark_freddy.png';
+                }
             } else {
                 document.getElementById('left_buttons').src = leftButtonImage;
                 document.getElementById('right_buttons').src = rightButtonImage;
@@ -570,6 +646,9 @@ function render() {
             document.getElementById('power_percentage').innerText = "";
             document.getElementById('current_night').innerText = "";
             document.getElementById('current_time').innerText = "";
+            if (!blackoutStarted) {
+                handleBlackout();
+            }
         } else {
             document.getElementById('power_percentage').innerText = Math.max(Math.floor(powerPercentage), 0) + "%";
             document.getElementById('current_night').innerText = "Night " + CURRENT_NIGHT;
@@ -615,35 +694,7 @@ function render() {
 
             render();
         } else if (win) {
-            stopAllAudios();
-            if (!playedWinAudio) {
-                playAudio('./noises/chimes.mp3', {duration: 20000});
-            }
-            document.body.querySelectorAll('div').forEach((div) => {
-                if (!div.classList.contains('win_text')) {
-                    div.classList.add("fade_black")
-                } else {
-                    div.classList.add('fade_in');
-
-                    if (div.classList.contains("win_text_hour")) {
-                        setTimeout(() => {
-                            div.classList.remove('fade_in');
-                            div.classList.add('fade_black');
-                            setTimeout(() => {
-                                div.textContent = "6";
-                                div.classList.remove('fade_black');
-                                div.classList.add('fade_in');
-                                setTimeout(() => {
-                                    const a = document.createElement('a');
-                                    a.href = './custom';
-                                    a.click();
-                                }, 5000)
-                            },3000)
-                        },3000)
-                    }
-                }
-            });
-
+            winNight();
         } else {
             render();
         }
