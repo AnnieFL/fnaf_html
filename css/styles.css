@@ -1,0 +1,33 @@
+@font-face {
+    font-family: 'FnafFont';
+    src: url("../icons/five-nights-at-freddys.otf") format("opentype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+*>* {
+    user-select: none;
+    font-family: 'FnafFont';
+}
+
+html {
+    background-color: black;
+    user-select: none;
+}
+
+body {
+    margin: 0px !important;
+    overflow: hidden;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+}

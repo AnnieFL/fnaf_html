@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./css/styles.css">
+    <link rel="stylesheet" href="./css/customNight.css">
+    <title>Custom Night Config</title>
+</head>
+<body>
+    <div class="custom_night">
+        <div class="animatronic_config">
+            <img class="custom_night_icon freddy_icon" src="./icons/freddy_icon.png" />
+            <input class="custom_night_input" id="freddy_ai" type="number" value="1" max="20" min="0" onchange="onChangeAI()">
+        </div>
+        <div class="animatronic_config">
+            <img class="custom_night_icon bonnie_icon" src="./icons/bonnie_icon.png" />
+            <input class="custom_night_input" id="bonnie_ai" type="number" value="9" max="20" min="0" onchange="onChangeAI()">
+        </div>
+        <div class="animatronic_config">
+            <img class="custom_night_icon chica_icon" src="./icons/chica_icon.png" />
+            <input class="custom_night_input" id="chica_ai" type="number" value="8" max="20" min="0" onchange="onChangeAI()">
+        </div>
+        <div class="animatronic_config">
+            <img class="custom_night_icon foxy_icon" src="./icons/foxy_icon.png" />
+            <input class="custom_night_input" id="foxy_ai" type="number" value="7" max="20" min="0" onchange="onChangeAI()">
+        </div>
+        <div class="start_button" onclick="startNight()">Start Night</div>
+    </div>
+
+    <script src="./js/customNight.js"></script>
+</body>
+</html>

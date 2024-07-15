@@ -1,0 +1,339 @@
+
+.screen>img {
+    width: 100vw;
+    height: 100vh;
+}
+
+.button_left {
+    position: absolute;
+    left: 0px;
+    top: 40vh;
+}
+
+.button_right {
+    position: absolute;
+    right: 0px;
+    top: 40vh;
+}
+
+.button>img {
+    height: 30vh;
+    width: 5vw;
+}
+
+.button_left_hitbox {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: absolute;
+    left: 5px;
+    top: 45vh;
+    z-index: 999;
+    height: 18vh;
+    width: 5vw;
+}
+
+.button_right_hitbox {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: absolute;
+    right: 5px;
+    top: 45vh;
+    z-index: 999;
+    height: 18vh;
+    width: 5vw;
+}
+
+.button_hitbox>* {
+    height: 8vh;
+    width: 5vw;
+}
+
+.door_left {
+    position: absolute;
+    left: 5vw;
+    transform: rotateY(180deg);
+    top: 0px;
+}
+
+.door_right {
+    position: absolute;
+    right: 5vw;
+    top: 0px;
+}
+
+.door>img {
+    height: 100vh;
+    width: 13vw;
+}
+
+.none {
+    display: none !important;
+    height: 0px !important;
+    width: 0px !important;
+}
+
+.invisible {
+    opacity: 0;
+}
+
+.close_door {
+    animation: close_door 50ms linear 0ms forwards;
+    transform-origin: top;
+}
+
+.open_door {
+    animation: open_door 50ms linear 0ms forwards;
+    transform-origin: top;
+}
+
+.honk_me {
+    position: absolute;
+    top: 31vh;
+    left: 41vw;
+    height: 5vh;
+    width: 3vw;
+}
+
+@keyframes close_door {
+    0% {
+        transform: scaleY(0);
+    }
+
+    100% {
+        transform: scaleY(1);
+    }
+}
+
+@keyframes open_door {
+    0% {
+        transform: scaleY(1);
+    }
+
+    100% {
+        transform: scaleY(0);
+    }
+}
+
+.camera_map {
+    position: absolute;
+    bottom: 15vh;
+    right: 0px;
+}
+
+.camera_map>img {
+    width: 50vw;
+    height: 60vh;
+}
+
+.cam_list {
+    position: relative;
+}
+
+.cam_list>div {
+    position: absolute;
+    background-color: grey;
+    border: 2px solid white;
+    color: white;
+    width: 50px;
+    height: 35px;
+    top: -60vh;
+    left: 0px;
+    font-size: 25px;
+    cursor: pointer;
+}
+
+.cam_list>.active_cam {
+    animation: cam_blink 1000ms linear 0ms infinite;
+}
+
+@keyframes cam_blink {
+    0% {
+        background-color: yellow;
+    }
+
+    50% {
+        background-color: rgb(92, 92, 0);
+    }
+
+    100% {
+        background-color: yellow;
+    }
+}
+
+#cam1A {
+    top: -56vh;
+    left: 15vw;
+}
+
+#cam1B {
+    top: -49vh;
+    left: 13vw;
+}
+
+#cam1C {
+    top: -37vh;
+    left: 7vw;
+}
+
+#cam3 {
+    top: -21vh;
+    left: 5vw;
+}
+
+#cam5 {
+    top: -44vh;
+    left: 0vw;
+}
+
+#cam6 {
+    top: -23vh;
+    left: 39vw;
+}
+
+#cam7 {
+    top: -44vh;
+    left: 40vw;
+}
+
+#cam2A {
+    top: -17vh;
+    left: 14vw;
+}
+
+#cam2B {
+    top: -12vh;
+    left: 14vw;
+}
+
+#cam4A {
+    top: -17vh;
+    left: 27vw;
+}
+
+#cam4B {
+    top: -12vh;
+    left: 27vw;
+}
+
+.flip_camera_hitbox {
+    position: absolute;
+    left: 25vw;
+    bottom: 0px;
+    height: 4.5vh;
+    width: 50vw;
+}
+
+.flip_camera_draw {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    bottom: 6vh;
+    height: 4.5vh;
+    width: 50vw;
+    border: 3px solid rgba(128, 128, 128, 0.473);
+    background-color: rgba(68, 68, 68, 0.397);
+    border-radius: 5px;
+}
+
+.flip_camera_draw>img {
+    height: 5vh;
+    width: 25%;
+    opacity: 0.5;
+}
+
+.camera_animation>img {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    left: 0px;
+    top: 0px;
+}
+
+.power {
+    position: absolute;
+    width: 10vw;
+    height: 5vh;
+    bottom: 5vh;
+    left: 5vw;
+    color: white;
+    font-size: 8vh;
+    text-align: right;
+}
+
+.night {
+    position: absolute;
+    width: 10vw;
+    height: 5vh;
+    top: 12vh;
+    right: 5vw;
+    color: white;
+    font-size: 6.5vh;
+    text-align: center;
+}
+
+.time {
+    position: absolute;
+    width: 10vw;
+    height: 5vh;
+    top: 5vh;
+    right: 5vw;
+    color: white;
+    font-size: 10vh;
+    text-align: center;
+}
+
+.debug {
+    position: absolute;
+    width: 10vw;
+    height: 5vh;
+    top: 50vh;
+    right: 50vw;
+    color: white;
+    font-size: 5vh;
+    text-align: right;
+}
+
+.fade_black {
+    animation: fade_black 1000ms linear 0ms 1 forwards;
+}
+
+.fade_in {
+    animation: fade_in 1000ms linear 0ms 1 forwards;
+}
+
+.win_text_wrapper {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    height: 100vh;
+    width: 100vw;
+    color: white;
+    font-size: 10em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+}
+
+@keyframes fade_black {
+    0% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes fade_in {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
