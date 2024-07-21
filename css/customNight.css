@@ -38,6 +38,7 @@
 .custom_night_input {
     font-size: 3em;
     width: 5vw;
+    min-width: 25px;
     margin-top: 15px;
     padding-top: 10px;
     text-align: center;
@@ -55,11 +56,19 @@
     right: 20px;
     font-size: 3em;
     width: 15vw;
+    min-width: 200px;
     padding: 15px;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
+}
+
+@media (max-height: 400px) {
+    .start_button {
+        font-size: 2em;
+        padding: 2px;
+    }
 }
 
 .start_button:hover {
