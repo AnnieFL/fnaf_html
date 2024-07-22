@@ -406,14 +406,14 @@ function tryJumpscare() {
 
                 if (freddyDarkDeath) {
                     officeImage = './screens/jumpscares/dark_jump.webp';
+                } else if (foxyDeath) {
+                    officeImage = './screens/jumpscares/foxy_jump.webp';
                 } else if (bonnieDeath && !chicaDeath) {
                     officeImage = './screens/jumpscares/bonnie_jump.webp';
                 } else if (chicaDeath && !bonnieDeath) {
                     officeImage = './screens/jumpscares/chica_jump.webp';
                 } else if (chicaDeath && bonnieDeath) {
                     officeImage = Math.floor(Math.random() * 10) % 2 == 0 ? './screens/jumpscares/bonnie_jump.webp' : './screens/jumpscares/chica_jump.webp';
-                } else if (foxyDeath) {
-                    officeImage = './screens/jumpscares/foxy_jump.webp';
                 } else if (freddyDeath) {
                     officeImage = './screens/jumpscares/freddy_jump.webp';
                 }
